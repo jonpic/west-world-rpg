@@ -1,0 +1,39 @@
+body {
+    background-image: url(../images/westworld-bg-2.jpg);
+    background-repeat: no-repeat;
+    background-size: cover;
+    color: #fff
+}
+
+img {
+    height: 100px;
+    width: 150px;
+    border-radius: 10px;
+}
+#main-title{
+    text-align: center;
+}
+
+.character {
+    color: #000;
+    display: inline-block;
+    border-style: solid;
+    border-color: green;
+    border-width: 3px;
+    cursor: pointer;
+    background-color: white;
+}
+
+.character-image {
+    padding: 0 16;
+    margin: 3 0;
+}
+
+.character-name {
+    text-align: center;
+}
+
+.character-hp {
+    text-align: center;
+}
+
