@@ -2,6 +2,8 @@
     var activeChar;
     var activeDefender;
     var enemyPool = [];
+    var counter = 0;
+    var killCount = 0;
 
     var characters = {
     "Dolores": {
@@ -33,6 +35,15 @@
         catk: 30
     }
 };
+var renderMessage = function(message) {
+    var gameMessageSet = $("#game-text-container");
+    var newMessage = $("<div>").text(message);
+    gameMessageSet.append(newMessage);
+
+    if (message === "clearMessage") {
+        gameMessageSet.text("");
+    }
+};
 
 var renderOne = function (character, renderArea, status) {
     var charDiv = $("<div class='character' data-name='" + character.name + "'>");
@@ -46,7 +57,7 @@ var renderOne = function (character, renderArea, status) {
         $(charDiv).addClass("enemy")
     }
     else if (status === "defender") {
-        activeDefender = characters[name];
+        activeDefender = character;
         $(charDiv).addClass("target-enemy");
     }
 };
@@ -69,11 +80,11 @@ var renderCharacters = function(charObj, areaRender) {
         }
         $(document).on("click", ".enemy", function() {
             var name = ($(this).attr("data-name"));
-            console.log(name)
             if ($("#defender").children().length === 0) {
-                activeDefender = characters[name];
+                console.log("here")
                 renderCharacters(name, "#defender");
                 $(this).hide();
+                renderMessage("clearMessage");
             }
         });
     }
@@ -85,8 +96,31 @@ var renderCharacters = function(charObj, areaRender) {
             }
         }
     }
+    if (areaRender === "playerDamage") {
+        $("#defender").empty();
+        renderOne(charObj, "#defender", "defender");
+    }
+
+    if (areaRender === "enemyDamage") {
+        $("#selected-character-container").empty();
+        renderOne(charObj, "#selected-character-container", "");
+    }
+
+    if (areaRender === "enemyDefeated") {
+        $("#defender").empty()
+        var gameStateMessage = "You defeated " + charObj.name + ". Pick another enemy."
+        renderMessage(gameStateMessage)
+    }
 }
 
+var restartGame = function(inputEndGame) {
+    var restart = $("<button>Restart</button>").click(function(){
+        location.reload();
+    });
+    var gameState = $("<div>").text(inputEndGame);
+    $("body").append(gameState);
+    $("body").append(restart);
+}
 renderCharacters(characters, "#character-select-container");
 
 $(document).on("click", ".character", function(){
@@ -102,6 +136,48 @@ $(document).on("click", ".character", function(){
 
         renderCharacters(activeChar, "#selected-character-container");
         renderCharacters(enemyPool, "#enemy-select-container");
+        
     }
+});
+
+$("#attack-button").on("click", function(){
+    if($("#defender").children().length !== 0) {
+        var atkMessage = "You attacked " + activeDefender.name + " for " + (activeChar.atk + counter) + " dmg." 
+        var catkMessage = "You were attacked for " + (activeDefender.catk) + " dmg." 
+        renderMessage("clearMessage");
+        
+        activeDefender.hp -= (activeChar.atk + counter)
+        console.log(activeDefender.hp)
+
+        if (activeDefender.hp > 0) {
+            activeDefender.hp -= (activeChar.atk + counter)
+            renderCharacters(activeDefender, "playerDamage");
+            renderMessage(atkMessage);
+            renderMessage(catkMessage)
+        }
+        else {
+            renderCharacters(activeDefender, "enemyDefeated");
+            killCount++
+            
+            if (killCount >= 3) {
+                $("#action").empty();
+                renderMessage("clearMessage")
+                restartGame("You win!")
+            }
+        }
+
+        if (activeChar.hp > 0) {
+            activeChar.hp -= activeDefender.catk
+            renderCharacters(activeChar, "enemyDamage");
+        }
+        if (activeChar.hp <= 0) {
+            $("#action").empty();
+            renderMessage("clearMessage");
+            restartGame("You were defeated")
+            
+        }
+    }
+    
+    counter++
 });
 //});
